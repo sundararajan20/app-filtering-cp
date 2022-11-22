@@ -1,0 +1,14 @@
+*DS_Store*
+*.ipynb_checkpoints
+*.swp
+.idea/
+tmp/
+target
+**/*.iml
+**/*.pyc
+**/*.bak
+**/.classpath
+**/.project
+**/.settings
+**/.factorypath
+util/.pipe_cfg
