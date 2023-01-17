@@ -16,6 +16,7 @@
 package org.onosproject.tpc;
 
 import org.onosproject.cfg.ComponentConfigService;
+import org.onosproject.tpc.common.AppFilteringEntry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Properties;
 
 import static org.onlab.util.Tools.get;
@@ -34,12 +36,8 @@ import static org.onlab.util.Tools.get;
 /**
  * Skeletal ONOS application component.
  */
-@Component(immediate = true,
-           service = {SomeInterface.class},
-           property = {
-               "someProperty=Some Default String Value",
-           })
-public class AppComponent implements SomeInterface {
+@Component(immediate = true, enabled = true)
+public class TPCAppComponent implements TPCService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -71,8 +69,13 @@ public class AppComponent implements SomeInterface {
     }
 
     @Override
-    public void someMethod() {
+    public void postApplicationFilteringRules(List<AppFilteringEntry> app_filtering_rules) {
         log.info("Invoked");
+    }
+
+    @Override
+    public void turnOffChecking() {
+
     }
 
 }
