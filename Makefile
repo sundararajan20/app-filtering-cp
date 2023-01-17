@@ -12,7 +12,7 @@ app-install:
 				$(info *** Installing and activating the TPC app in ONOS...)
 				${onos_curl} -X POST -HContent-Type:application/octet-stream \
 					'${onos_url}/v1/applications?activate=true' \
-					--data-binary @target/app-filtering-cp-1.0.0
+					--data-binary @target/app-filtering-cp-1.0.0.oar
 				@echo
 
 app-uninstall:
