@@ -14,11 +14,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.onlab.util.Tools.readTreeFromStream;
 
 @Path("tpc")
 public class TPCWebResource extends AbstractWebResource {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     @GET
     @Path("flush")
     public Response flushFlowRules() {
@@ -49,6 +53,7 @@ public class TPCWebResource extends AbstractWebResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("add_rules")
     public Response postAppFilteringRules(InputStream stream) {
+	log.info("Received rules .json file");
         List<AppFilteringEntry> appFilteringEntries = jsonToAppFilteringEntries(stream);
         get(TPCService.class).postApplicationFilteringRules(appFilteringEntries);
         return Response.noContent().build();
@@ -59,13 +64,18 @@ public class TPCWebResource extends AbstractWebResource {
 
         JsonNode node;
         try {
+            log.info("Going to read node");
             node = readTreeFromStream(mapper(), stream);
+            log.info("Read node");
         } catch (IOException e) {
+            log.info("Exception");
             throw new IllegalArgumentException("Unable to parse add request", e);
         }
 
+	log.info("Here!");
         Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
         while (fields.hasNext()) {
+	    log.info("Here too!");
             Map.Entry<String, JsonNode> field = fields.next();
             JsonNode subNode = field.getValue();
 
@@ -85,10 +95,13 @@ public class TPCWebResource extends AbstractWebResource {
                     priorityStr != null &&
                     actionStr != null) {
 
+	        log.info("Inside here too!");
                 attackEntries.add(new AppFilteringEntry(ueIpAddrStr, appIpProtoStr,
                         appIpAddrStr, appL4PortLowStr, appL4PortHighStr, priorityStr, actionStr));
+	        log.info("Below inside here too!");
             }
         }
+	log.info("Here in the end!");
 
         return attackEntries;
     }

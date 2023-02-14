@@ -17,7 +17,7 @@ app-install:
 
 app-uninstall:
 	$(info *** Uninstalling the TPC app from ONOS (if present)...) \
-		-${onos_curl} -X DELETE ${onos_url}/v1/applications/org.onosproject.app-filtering-cp
+		${onos_curl} -X DELETE ${onos_url}/v1/applications/org.onosproject.tpc-app
 	@echo
 
 set1:

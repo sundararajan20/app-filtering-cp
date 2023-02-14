@@ -10,27 +10,31 @@ import org.onosproject.net.pi.model.PiActionParamId;
 import org.onosproject.net.pi.model.PiMatchFieldId;
 import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiActionParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.onosproject.tpc.AppConstants.HIGH_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.AppConstants.MEDIUM_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.common.Utils.buildFlowRule;
 
 public class AppFilteringEntry {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     public String ue_ip_addr;
 
-    public Ip4Address app_ip_addr;
-    public Integer app_l4_port_low, app_l4_port_high, priority;
-    public byte app_ip_proto, app_ip_proto_mask, action;
+    public Integer app_l4_port_low, app_l4_port_high, priority, app_ip_proto, app_ip_proto_mask, action;
 
     public AppFilteringEntry(String ue_ip_addr, String app_ip_proto, String app_ip_addr, String app_l4_port_low, String app_l4_port_high, String priority, String action) {
+	log.info("log1");
         this.ue_ip_addr = ue_ip_addr;
-        this.app_ip_proto = Byte.valueOf(app_ip_proto);
-        this.app_ip_proto_mask = (byte) 0xFF;
-        this.app_ip_addr = Ip4Address.valueOf(app_ip_addr);
+        this.app_ip_proto = Integer.valueOf(app_ip_proto);
+        this.app_ip_proto_mask = 0xFF;
+	log.info("log2");
         this.app_l4_port_low = Integer.valueOf(app_l4_port_low);
         this.app_l4_port_high = Integer.valueOf(app_l4_port_high);
         this.priority = Integer.valueOf(priority);
-        this.action = Byte.valueOf(action);
+        this.action = Integer.valueOf(action);
+	log.info("log3");
     }
 
     public FlowRule constructRulesForUpf(DeviceId upfDeviceId, ApplicationId appId) {
@@ -40,8 +44,6 @@ public class AppFilteringEntry {
                 .matchExact(PiMatchFieldId.of("checker_header.variables.update_version"), 1)
                 .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), 1)
                 .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
-                // .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_addr.toInt(), 32)
-                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), 0, 0)
                 .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
                 .build();
 
@@ -59,11 +61,10 @@ public class AppFilteringEntry {
                 "  ue_ip_addr=%s, " +
                 "  app_ip_proto=%s, " +
                 "  app_ip_proto_mask=%s, " +
-                "  app_ip_addr=%s, " +
                 "  app_l4_port_low=%s, " +
                 "  app_l4_port_high=%s, " +
                 "  priority=%s" +
                 "  action=%s" +
-                "}", ue_ip_addr, app_ip_proto, app_ip_proto_mask, app_ip_addr, app_l4_port_low, app_l4_port_high, priority, action);
+                "}", ue_ip_addr, app_ip_proto, app_ip_proto_mask, app_l4_port_low, app_l4_port_high, priority, action);
     }
 }
