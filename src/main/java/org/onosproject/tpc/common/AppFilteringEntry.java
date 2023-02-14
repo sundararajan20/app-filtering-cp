@@ -40,7 +40,8 @@ public class AppFilteringEntry {
                 .matchExact(PiMatchFieldId.of("checker_header.variables.update_version"), 1)
                 .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), 1)
                 .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
-                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_addr.toInt(), 32)
+                // .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_addr.toInt(), 32)
+                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), 0, 0)
                 .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
                 .build();
 

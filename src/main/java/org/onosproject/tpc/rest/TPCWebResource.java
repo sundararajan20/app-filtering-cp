@@ -71,7 +71,6 @@ public class TPCWebResource extends AbstractWebResource {
 
             String ueIpAddrStr = subNode.path("ueIpAddr").asText(null);
             String appIpProtoStr = subNode.path("appIpProto").asText(null);
-            String appIpProtoMaskStr = subNode.path("appIpProtoMask").asText(null);
             String appIpAddrStr = subNode.path("appIpAddr").asText(null);
             String appL4PortLowStr = subNode.path("appL4PortLow").asText(null);
             String appL4PortHighStr = subNode.path("appL4PortHigh").asText(null);
@@ -80,7 +79,6 @@ public class TPCWebResource extends AbstractWebResource {
 
             if (ueIpAddrStr != null &&
                     appIpProtoStr != null &&
-                    appIpProtoMaskStr != null &&
                     appIpAddrStr != null &&
                     appL4PortLowStr != null &&
                     appL4PortHighStr != null &&

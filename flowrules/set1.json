@@ -1,0 +1,20 @@
+{
+  "1": {
+    "ueIpAddr": "17.0.0.1",
+    "appIpProto": "17",
+    "appIpAddr": "0.0.0.0/0",
+    "appL4PortLow": "81",
+    "appL4PortHigh": "81",
+    "priority": "100",
+    "action": "2"
+  },
+  "2": {
+    "ueIpAddr": "17.0.1.1",
+    "appIpProto": "17",
+    "appIpAddr": "0.0.0.0/0",
+    "appL4PortLow": "81",
+    "appL4PortHigh": "82",
+    "priority": "99",
+    "action": "1"
+  }
+}
