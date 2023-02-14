@@ -52,31 +52,23 @@ public class MainComponent {
 
     @Deactivate
     protected void deactivate() {
-        cleanUpUpdateVersionTable();
-        cleanUp();
-
         log.info("Stopped");
+    }
+
+    /**
+     * Returns the application ID.
+     *
+     * @return application ID
+     */
+    ApplicationId getAppId() {
+        return appId;
     }
 
     /**
      * Triggers clean up of flows in the update version table, returns false if no
      * flows were found, true otherwise.
      */
-    private void cleanUpUpdateVersionTable() {
-        Collection<FlowRule> flowRulesToRemove = Lists.newArrayList();
-        for (FlowRule flow : flowRuleService.getFlowEntriesById(appId)) {
-            if (flow.table().equals(PiTableId.of("FabricIngress.init_control.tb_set_update_version"))) {
-                flowRulesToRemove.add(flow);
-            }
-        }
 
-        if (flowRulesToRemove.isEmpty()) {
-            return;
-        }
-
-        flowRulesToRemove.forEach(flowRuleService::removeFlowRules);
-
-    }
 
     /**
      * Triggers clean up of flows from this app, returns false if no
@@ -84,7 +76,7 @@ public class MainComponent {
      *
      * @return false if no flows were found, true otherwise
      */
-    private boolean cleanUp() {
+    public boolean cleanUp() {
         Collection<FlowRule> flows = Lists.newArrayList(
                 flowRuleService.getFlowEntriesById(appId).iterator());
 

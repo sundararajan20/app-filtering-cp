@@ -1,5 +1,6 @@
 package org.onosproject.tpc.common;
 
+import com.google.common.collect.Lists;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.flow.DefaultFlowRule;
@@ -11,6 +12,8 @@ import org.onosproject.net.pi.model.PiTableId;
 import org.onosproject.net.pi.runtime.PiTableAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 
 public class Utils {
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
