@@ -116,9 +116,16 @@ public class TPCAppComponent implements TPCService {
     @Override
     public void postApplicationFilteringRules(List<AppFilteringEntry> app_filtering_rules) {
         log.info("Received postApplicationFilteringRules");
+
+        List<FlowRule> flowRules = new ArrayList<>();
         for (AppFilteringEntry rule: app_filtering_rules) {
+            FlowRule flowRule = rule.constructRulesForUpf(DeviceId.deviceId("device:leaf1"), appId);
+            flowRules.add(flowRule);
             log.info(rule.toString());
+            log.info(flowRule.toString());
         }
+
+        flowRuleService.applyFlowRules(flowRules.toArray(new FlowRule[flowRules.size()]));
     }
 
     @Override
