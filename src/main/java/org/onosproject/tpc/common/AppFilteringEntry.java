@@ -42,7 +42,7 @@ public class AppFilteringEntry {
 
         PiCriterion match = PiCriterion.builder()
                 .matchExact(PiMatchFieldId.of("checker_header.variables.update_version"), 1)
-                .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), 1)
+                .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), Ip4Address.valueOf(this.ue_ip_addr).toOctets())
                 .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
                 .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
                 .build();
