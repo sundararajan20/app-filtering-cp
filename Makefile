@@ -2,6 +2,9 @@ onos_url := http://localhost:8181/onos
 onos_curl := curl --fail -sSL --user onos:rocks --noproxy localhost
 MVN_IMG := maven:3.6.3-openjdk-11
 
+onos-cli:
+	ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -o LogLevel=ERROR -p 8101 onos@localhost
+
 app-build:
 	$(info *** Building the TPC ONOS app for application filtering...)
 	@mkdir -p target
@@ -24,6 +27,12 @@ set1:
 	$(info *** Posting flowrules/set1.json...)
 	${onos_curl} -X POST -H 'Content-Type:application/json' \
 		${onos_url}/tpc/add_rules -d@./flowrules/set1.json
+	@echo
+
+demo-flows:
+	$(info *** Posting flowrules/demo-flows.json...)
+	${onos_curl} -X POST -H 'Content-Type:application/json' \
+		${onos_url}/tpc/add_rules -d@./flowrules/demo-flows.json
 	@echo
 
 turn-on-checking:

@@ -25,16 +25,13 @@ public class AppFilteringEntry {
     public Integer app_l4_port_low, app_l4_port_high, priority, app_ip_proto, app_ip_proto_mask, action;
 
     public AppFilteringEntry(String ue_ip_addr, String app_ip_proto, String app_ip_addr, String app_l4_port_low, String app_l4_port_high, String priority, String action) {
-	log.info("log1");
-        this.ue_ip_addr = ue_ip_addr;
+	    this.ue_ip_addr = ue_ip_addr;
         this.app_ip_proto = Integer.valueOf(app_ip_proto);
         this.app_ip_proto_mask = 0xFF;
-	log.info("log2");
         this.app_l4_port_low = Integer.valueOf(app_l4_port_low);
         this.app_l4_port_high = Integer.valueOf(app_l4_port_high);
         this.priority = Integer.valueOf(priority);
         this.action = Integer.valueOf(action);
-	log.info("log3");
     }
 
     public FlowRule constructRulesForUpf(DeviceId upfDeviceId, ApplicationId appId) {

@@ -88,7 +88,7 @@ public class TPCAppComponent implements TPCService {
 
         packetService.addProcessor(packetProcessor, PacketProcessor.advisor(0));
 
-	// TODO: new devices might be discovered after
+        // TODO: new devices might be discovered after
         installAclPuntRules();
         setUpTelemetryStripping();
 
@@ -119,7 +119,7 @@ public class TPCAppComponent implements TPCService {
         log.info("Received postApplicationFilteringRules");
 
         List<FlowRule> flowRules = new ArrayList<>();
-        for (AppFilteringEntry rule: app_filtering_rules) {
+        for (AppFilteringEntry rule : app_filtering_rules) {
             FlowRule flowRule = rule.constructRulesForUpf(DeviceId.deviceId("device:leaf1"), appId);
             flowRules.add(flowRule);
             log.info(rule.toString());
@@ -150,8 +150,8 @@ public class TPCAppComponent implements TPCService {
     public void setUpTelemetryStripping() {
         List<FlowRule> flowRules = new ArrayList<>();
 
-        for (Device device: deviceService.getAvailableDevices()) {
-            for (PortNumber portNumber: edgePortsOnDevice(device.id())) {
+        for (Device device : deviceService.getAvailableDevices()) {
+            for (PortNumber portNumber : edgePortsOnDevice(device.id())) {
                 PiMatchFieldId UPDATE_VERSION = PiMatchFieldId.of("checker_header.variables.update_version");
                 PiMatchFieldId HDR_EG_PORT = PiMatchFieldId.of("eg_port");
                 String tableIdCheckLastHop = "FabricEgress.checker_control.tb_check_last_hop";
@@ -176,12 +176,12 @@ public class TPCAppComponent implements TPCService {
     public List<PortNumber> edgePortsOnDevice(DeviceId deviceId) {
         List<Port> portsOnDevice = deviceService.getPorts(deviceId);
         List<PortNumber> portNumbersOnDevice = new ArrayList<>();
-        for (Port port: portsOnDevice) {
+        for (Port port : portsOnDevice) {
             portNumbersOnDevice.add(port.number());
         }
         Set<Link> linksOnDevice = linkService.getDeviceEgressLinks(deviceId);
 
-        for (Link link: linksOnDevice) {
+        for (Link link : linksOnDevice) {
             if (portNumbersOnDevice.contains(link.src().port())) {
                 portNumbersOnDevice.remove(link.src().port());
             }
@@ -192,7 +192,7 @@ public class TPCAppComponent implements TPCService {
 
     public void installAclPuntRules() {
         List<FlowRule> puntRules = new ArrayList<>();
-        for (Device device: deviceService.getAvailableDevices()) {
+        for (Device device : deviceService.getAvailableDevices()) {
             puntRules.add(failedPacketsAclRule(device.id()));
         }
 
@@ -217,7 +217,7 @@ public class TPCAppComponent implements TPCService {
 
     public void setUpdateVersion() {
         List<FlowRule> rules = new ArrayList<>();
-        for (Device device: deviceService.getAvailableDevices()) {
+        for (Device device : deviceService.getAvailableDevices()) {
             rules.add(updateVersionRule(device.id()));
         }
 
@@ -268,10 +268,10 @@ public class TPCAppComponent implements TPCService {
         public void process(PacketContext context) {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
-                log.info("Packet received from checker on device {}!", context.inPacket().receivedFrom());
+                log.info("Report received from checker on device {}!", context.inPacket().receivedFrom());
+                log.info("Report contents are:", context.inPacket().unparsed());
                 context.block();
             }
         }
     }
-
 }
