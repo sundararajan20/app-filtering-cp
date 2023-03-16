@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import shaded.org.apache.commons.codec.binary.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -271,8 +272,8 @@ public class TPCAppComponent implements TPCService {
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
                 String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
-                log.info("Report contents are: {}", contents);
-		log.info("");
+                log.info("Report contents are: {}", Hex.encodeHexString(context.inPacket().unparsed()));
+                log.info("");
                 context.block();
             }
         }

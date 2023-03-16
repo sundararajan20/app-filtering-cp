@@ -53,7 +53,7 @@ public class TPCWebResource extends AbstractWebResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("add_rules")
     public Response postAppFilteringRules(InputStream stream) {
-	log.info("Received rules .json file");
+	    log.info("Received rules .json file");
         List<AppFilteringEntry> appFilteringEntries = jsonToAppFilteringEntries(stream);
         get(TPCService.class).postApplicationFilteringRules(appFilteringEntries);
         return Response.noContent().build();
@@ -64,18 +64,14 @@ public class TPCWebResource extends AbstractWebResource {
 
         JsonNode node;
         try {
-            log.info("Going to read node");
             node = readTreeFromStream(mapper(), stream);
-            log.info("Read node");
         } catch (IOException e) {
             log.info("Exception");
             throw new IllegalArgumentException("Unable to parse add request", e);
         }
 
-	log.info("Here!");
-        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+	    Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
         while (fields.hasNext()) {
-	    log.info("Here too!");
             Map.Entry<String, JsonNode> field = fields.next();
             JsonNode subNode = field.getValue();
 
@@ -94,14 +90,10 @@ public class TPCWebResource extends AbstractWebResource {
                     appL4PortHighStr != null &&
                     priorityStr != null &&
                     actionStr != null) {
-
-	        log.info("Inside here too!");
                 attackEntries.add(new AppFilteringEntry(ueIpAddrStr, appIpProtoStr,
                         appIpAddrStr, appL4PortLowStr, appL4PortHighStr, priorityStr, actionStr));
-	        log.info("Below inside here too!");
             }
         }
-	log.info("Here in the end!");
 
         return attackEntries;
     }
