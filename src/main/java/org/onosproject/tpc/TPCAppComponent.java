@@ -88,6 +88,7 @@ public class TPCAppComponent implements TPCService {
 
         packetService.addProcessor(packetProcessor, PacketProcessor.advisor(0));
 
+	// TODO: new devices might be discovered after
         installAclPuntRules();
         setUpTelemetryStripping();
 
