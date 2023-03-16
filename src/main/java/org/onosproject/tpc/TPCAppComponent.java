@@ -45,6 +45,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.onlab.util.Tools.get;
@@ -268,8 +269,9 @@ public class TPCAppComponent implements TPCService {
         public void process(PacketContext context) {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
+                String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
                 log.info("Report received from checker on device {}!", context.inPacket().receivedFrom());
-                log.info("Report contents are:", context.inPacket().unparsed());
+                log.info("Report contents are:", contents);
                 context.block();
             }
         }
