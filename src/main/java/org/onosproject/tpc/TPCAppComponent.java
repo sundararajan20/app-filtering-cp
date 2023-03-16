@@ -270,8 +270,9 @@ public class TPCAppComponent implements TPCService {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
                 String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
-                log.info("Report received from checker on device {}!", context.inPacket().receivedFrom());
-                log.info("Report contents are:", contents);
+                log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
+                log.info("Report contents are: {}", contents);
+		log.info("");
                 context.block();
             }
         }
