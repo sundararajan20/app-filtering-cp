@@ -262,6 +262,17 @@ public class TPCAppComponent implements TPCService {
         flowRulesToRemove.forEach(flowRuleService::removeFlowRules);
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+        int v = bytes[j] & 0xFF;
+        hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+        hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     /**
      * Processes incoming packets.
      */
@@ -270,9 +281,12 @@ public class TPCAppComponent implements TPCService {
         public void process(PacketContext context) {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
-                String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
+                // String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
+		ByteBuffer buf = context.inPacket().unparsed();
+		byte[] arr = new byte[buf.remaining()];
+		buf.get(arr);
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
-                log.info("Report contents are: {}", Hex.encodeHexString(context.inPacket().unparsed()));
+                log.info("Report contents are: {}", bytesToHex(arr));
                 log.info("");
                 context.block();
             }
