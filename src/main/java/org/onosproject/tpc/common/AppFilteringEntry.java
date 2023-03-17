@@ -1,6 +1,7 @@
 package org.onosproject.tpc.common;
 
 import org.onlab.packet.Ip4Address;
+import org.onlab.packet.Ip4Prefix;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.flow.FlowRule;
@@ -22,10 +23,13 @@ public class AppFilteringEntry {
 
     public String ue_ip_addr;
 
+    public Ip4Prefix app_ip_prefix;
+
     public Integer app_l4_port_low, app_l4_port_high, priority, app_ip_proto, app_ip_proto_mask, action;
 
     public AppFilteringEntry(String ue_ip_addr, String app_ip_proto, String app_ip_addr, String app_l4_port_low, String app_l4_port_high, String priority, String action) {
 	    this.ue_ip_addr = ue_ip_addr;
+        this.app_ip_prefix = Ip4Prefix.valueOf(app_ip_addr);
         this.app_ip_proto = Integer.valueOf(app_ip_proto);
         this.app_ip_proto_mask = 0xFF;
         this.app_l4_port_low = Integer.valueOf(app_l4_port_low);
@@ -42,6 +46,7 @@ public class AppFilteringEntry {
                 .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), Ip4Address.valueOf(this.ue_ip_addr).toOctets())
                 .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
                 .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
+                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_prefix.address().toInt(), this.app_ip_prefix.prefixLength())
                 .build();
 
         PiAction action = PiAction.builder()
@@ -56,12 +61,13 @@ public class AppFilteringEntry {
     public String toString() {
         return String.format("AppFilteringEntry{ " +
                 "  ue_ip_addr=%s, " +
+                "  app_ip_prefix=%s, " +
                 "  app_ip_proto=%s, " +
                 "  app_ip_proto_mask=%s, " +
                 "  app_l4_port_low=%s, " +
                 "  app_l4_port_high=%s, " +
                 "  priority=%s" +
                 "  action=%s" +
-                "}", ue_ip_addr, app_ip_proto, app_ip_proto_mask, app_l4_port_low, app_l4_port_high, priority, action);
+                "}", ue_ip_addr, app_ip_prefix, app_ip_proto, app_ip_proto_mask, app_l4_port_low, app_l4_port_high, priority, action);
     }
 }
