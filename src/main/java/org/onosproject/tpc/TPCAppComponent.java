@@ -154,7 +154,17 @@ public class TPCAppComponent implements TPCService {
         List<FlowRule> flowRules = new ArrayList<>();
 
         for (Device device : deviceService.getAvailableDevices()) {
-            for (PortNumber portNumber : edgePortsOnDevice(device.id())) {
+            for (Integer portToAdd = 0; portToAdd < 512; portToAdd++) {
+            // for (PortNumber portNumber : edgePortsOnDevice(device.id())) {
+                // log.info("Edge port on device {} is {}", device.id(), portNumber);
+                // XXX: Hack
+                /*
+                Long portToAdd = portNumber.toLong();
+                if (portToAdd > 100) {
+                    portToAdd /= 100;
+                }
+                */
+
                 PiMatchFieldId UPDATE_VERSION = PiMatchFieldId.of("checker_header.variables.update_version");
                 PiMatchFieldId HDR_EG_PORT = PiMatchFieldId.of("eg_port");
                 String tableIdCheckLastHop = "FabricEgress.checker_control.tb_check_last_hop";
@@ -162,7 +172,7 @@ public class TPCAppComponent implements TPCService {
 
                 PiCriterion match = PiCriterion.builder()
                         .matchExact(UPDATE_VERSION, 0x1)
-                        .matchExact(HDR_EG_PORT, portNumber.toLong())
+                        .matchExact(HDR_EG_PORT, portToAdd)
                         .build();
 
                 PiAction action = PiAction.builder()

@@ -54,7 +54,7 @@ public class AppFilteringEntry {
                 .withParameter(new PiActionParam(PiActionParamId.of("lookup_filtering_actions"), this.action))
                 .build();
 
-        return buildFlowRule(upfDeviceId, appId, table, match, action, priority);
+        return buildFlowRule(upfDeviceId, appId, table, match, action, this.priority);
     }
 
     @Override

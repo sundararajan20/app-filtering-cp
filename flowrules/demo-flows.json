@@ -1,9 +1,18 @@
 {
   "1": {
-    "ueIpAddr": "10.250.237.140",
+    "ueIpAddr": "10.250.237.159",
     "appIpProto": "6",
-    "appIpAddr": "0.0.0.0/0",
-    "appL4PortLow": "1",
+    "appIpAddr": "10.64.5.35/32",
+    "appL4PortLow": "10000",
+    "appL4PortHigh": "65535",
+    "priority": "100",
+    "action": "1"
+  },
+  "2": {
+    "ueIpAddr": "10.250.237.159",
+    "appIpProto": "6",
+    "appIpAddr": "10.250.0.0/16",
+    "appL4PortLow": "10000",
     "appL4PortHigh": "65535",
     "priority": "100",
     "action": "1"
