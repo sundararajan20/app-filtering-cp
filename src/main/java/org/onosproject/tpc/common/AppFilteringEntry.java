@@ -41,21 +41,19 @@ public class AppFilteringEntry {
     public FlowRule constructRulesForUpf(DeviceId upfDeviceId, ApplicationId appId) {
         String table = "FabricIngress.init_control.tb_lkp_cp_dict_var_filtering_actions";
 
-	if (this.app_ip_prefix.prefixLength()) {
-            PiCriterion match = PiCriterion.builder()
+        PiCriterion match = PiCriterion.builder()
                 .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), Ip4Address.valueOf(this.ue_ip_addr).toOctets())
                 .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
                 .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
-                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_prefix.address().toInt(), this.app_ip_prefix.prefixLength())
                 .build();
-	} else {
-            PiCriterion match = PiCriterion.builder()
-                .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), Ip4Address.valueOf(this.ue_ip_addr).toOctets())
-                .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
-                .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
-                .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_prefix.address().toInt())
-                .build();
-	}
+	    if (this.app_ip_prefix.prefixLength() > 0) {
+            match = PiCriterion.builder()
+                    .matchExact(PiMatchFieldId.of("checker_header.variables.ue_ipv4_addr"), Ip4Address.valueOf(this.ue_ip_addr).toOctets())
+                    .matchTernary(PiMatchFieldId.of("checker_header.variables.app_ip_proto"), this.app_ip_proto, this.app_ip_proto_mask)
+                    .matchRange(PiMatchFieldId.of("checker_header.variables.app_l4_port"), this.app_l4_port_low, this.app_l4_port_high)
+                    .matchLpm(PiMatchFieldId.of("checker_header.variables.app_ipv4_addr"), this.app_ip_prefix.address().toInt(), this.app_ip_prefix.prefixLength())
+                    .build();
+        }
 
         PiAction action = PiAction.builder()
                 .withId(PiActionId.of("FabricIngress.init_control.lkp_cp_dict_var_filtering_actions"))
