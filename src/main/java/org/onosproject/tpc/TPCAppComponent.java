@@ -91,6 +91,7 @@ public class TPCAppComponent implements TPCService {
 
         // TODO: new devices might be discovered after
         installAclPuntRules();
+        installReportThrottlingRules();
 
         log.info("Started");
     }
@@ -148,6 +149,31 @@ public class TPCAppComponent implements TPCService {
 
         PiCriterion match = PiCriterion.builder()
                 .matchTernary(HDR_ETH_TYPE, ETH_TYPE_TPC_REPORT, ETH_TYPE_TPC_REPORT_MASK)
+                .build();
+
+        PiAction action = PiAction.builder()
+                .withId(piActionId)
+                .build();
+
+        return buildFlowRule(deviceId, appId, tableId, match, action, HIGH_FLOW_RULE_PRIORITY);
+    }
+
+    public void installReportThrottlingRules() {
+        List<FlowRule> puntRules = new ArrayList<>();
+        for (Device device : deviceService.getAvailableDevices()) {
+            puntRules.add(reportThrottlingRule(device.id()));
+        }
+
+        flowRuleService.applyFlowRules(puntRules.toArray(new FlowRule[puntRules.size()]));
+    }
+
+    public FlowRule reportThrottlingRule(DeviceId deviceId) {
+        String tableId = "FabricIngress.checker_report_control.config";
+        PiMatchFieldId HDR_ETH_TYPE_IS_VALID = PiMatchFieldId.of("eth_type_is_valid");
+        PiActionId piActionId = PiActionId.of("nop");
+
+        PiCriterion match = PiCriterion.builder()
+                .matchExact(HDR_ETH_TYPE_IS_VALID, 1)
                 .build();
 
         PiAction action = PiAction.builder()
