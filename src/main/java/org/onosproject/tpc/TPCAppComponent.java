@@ -144,6 +144,12 @@ public class TPCAppComponent implements TPCService {
     public void flushFlowRules() {
         log.info("Received flushFlowRules");
         flowRuleService.removeFlowRulesById(appId);
+        lock.lock();
+        try {
+            rogue_ues.clear();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -160,11 +166,11 @@ public class TPCAppComponent implements TPCService {
     }
 
     @Override
-    public void blockRogueIp(String ip) {
+    public void blockRogueIp(List<String> ips) {
         log.info("Received blockRogueIp");
         lock.lock();
         try {
-            rogue_ues.add(ip);
+            rogue_ues.addAll(ips);
         } finally {
             lock.unlock();
         }

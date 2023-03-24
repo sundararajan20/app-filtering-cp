@@ -50,8 +50,8 @@ public class TPCWebResource extends AbstractWebResource {
     @Path("blockRogueIp")
     public Response blockIp(InputStream stream) {
         log.info("Received rogue Ip .json file");
-        String rogueIp = jsonToRogueIp(stream);
-        get(TPCService.class).blockRogueIp(rogueIp);
+        List<String> rogueIps = jsonToRogueIp(stream);
+        get(TPCService.class).blockRogueIp(rogueIps);
         return Response.noContent().build();
     }
 
@@ -70,8 +70,8 @@ public class TPCWebResource extends AbstractWebResource {
         return Response.noContent().build();
     }
 
-    private String jsonToRogueIp(InputStream stream) throws IllegalArgumentException {
-        String ip = new String();
+    private List<String> jsonToRogueIp(InputStream stream) throws IllegalArgumentException {
+        List<String> ips = new ArrayList<>();
 
         JsonNode node;
         try {
@@ -88,10 +88,10 @@ public class TPCWebResource extends AbstractWebResource {
 
             String rogueIpStr = subNode.path("rogueIp").asText(null);
             if (rogueIpStr != null) {
-                ip = rogueIpStr;
+                ips.add(rogueIpStr);
             }
         }
-        return ip;
+        return ips;
     }
 
     private List<AppFilteringEntry> jsonToAppFilteringEntries(InputStream stream) throws IllegalArgumentException {

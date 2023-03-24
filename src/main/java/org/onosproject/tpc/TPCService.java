@@ -13,5 +13,5 @@ public interface TPCService {
 
     List<String> getRogueIps();
 
-    void blockRogueIp(String ip);
+    void blockRogueIp(List<String> ip);
 }
