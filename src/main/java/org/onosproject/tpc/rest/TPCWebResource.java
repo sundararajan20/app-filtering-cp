@@ -1,6 +1,7 @@
 package org.onosproject.tpc.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.onlab.packet.Ip4Address;
 import org.onosproject.rest.AbstractWebResource;
 import org.onosproject.tpc.TPCService;
 import org.onosproject.tpc.common.AppFilteringEntry;
@@ -10,10 +11,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.PrintWriter;
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +28,21 @@ public class TPCWebResource extends AbstractWebResource {
     public Response flushFlowRules() {
         get(TPCService.class).flushFlowRules();
         return Response.noContent().build();
+    }
+
+    /*
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "ipaddresses": ["172.250.237.121","172.250.237.154", "172.250.237.153"]}'
+    */
+
+    @GET
+    @Path("rogueIps")
+    public Response getRogueIps() {
+        List<String> rogueIps = get(TPCService.class).getRogueIps();
+        String resp = "{ \"ipaddresses\": [\"" + String.join(", ", rogueIps) + "\"] }";
+        log.info("Sending {}!", resp);
+        return Response.ok(resp, MediaType.APPLICATION_JSON).build();
     }
 
     /**

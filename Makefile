@@ -46,4 +46,9 @@ flush-flows:
 	${onos_curl} ${onos_url}/tpc/flush
 	@echo
 
+get-rogue-ues:
+	$(info *** Flushing flows...)
+	${onos_curl} ${onos_url}/tpc/rogueIps
+	@echo
+
 app-reload: app-uninstall app-install

@@ -81,6 +81,8 @@ public class TPCAppComponent implements TPCService {
     private static short ETH_TYPE_TPC_REPORT = (short) 0x5678;
     private static short ETH_TYPE_TPC_REPORT_MASK = (short) 0xFFFF;
 
+    private Set<String> rogue_ues;
+
     private final InternalPacketProcessor packetProcessor = new InternalPacketProcessor();
 
     @Activate
@@ -92,6 +94,9 @@ public class TPCAppComponent implements TPCService {
         // TODO: new devices might be discovered after
         installAclPuntRules();
         installReportThrottlingRules();
+
+        rogue_ues.add("1.1.1.1");
+        rogue_ues.add("8.8.8.8");
 
         log.info("Started");
     }
@@ -131,6 +136,13 @@ public class TPCAppComponent implements TPCService {
     public void flushFlowRules() {
         log.info("Received flushFlowRules");
         flowRuleService.removeFlowRulesById(appId);
+    }
+
+    @Override
+    public List<String> getRogueIps() {
+        log.info("Received getRogueIps");
+        List<String> ret = new ArrayList<>(rogue_ues);
+        return ret;
     }
 
     public void installAclPuntRules() {
@@ -199,7 +211,10 @@ public class TPCAppComponent implements TPCService {
                     addr += Byte.toUnsignedInt(ipv4_payload[i]) << offset;
                     offset -= 1;
                 }
-                log.info("Rogue UE is: {}", Ip4Address.valueOf(addr));
+                Ip4Address ue_addr = Ip4Address.valueOf(addr);
+                log.info("Rogue UE is: {}", ue_addr);
+                rogue_ues.add(ue_addr.toString());
+                log.info("UEs on blacklist are: {}", rogue_ues);
                 context.block();
             }
         }
