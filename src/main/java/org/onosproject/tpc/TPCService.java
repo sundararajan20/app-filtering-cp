@@ -12,4 +12,6 @@ public interface TPCService {
     void flushFlowRules();
 
     List<String> getRogueIps();
+
+    void blockRogueIp(String ip);
 }

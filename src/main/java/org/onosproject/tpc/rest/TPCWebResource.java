@@ -45,6 +45,16 @@ public class TPCWebResource extends AbstractWebResource {
         return Response.ok(resp, MediaType.APPLICATION_JSON).build();
     }
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("blockRogueIp")
+    public Response blockIp(InputStream stream) {
+        log.info("Received rogue Ip .json file");
+        String rogueIp = jsonToRogueIp(stream);
+        get(TPCService.class).blockRogueIp(rogueIp);
+        return Response.noContent().build();
+    }
+
     /**
      * Post application filtering rules.
      *
@@ -58,6 +68,30 @@ public class TPCWebResource extends AbstractWebResource {
         List<AppFilteringEntry> appFilteringEntries = jsonToAppFilteringEntries(stream);
         get(TPCService.class).postApplicationFilteringRules(appFilteringEntries);
         return Response.noContent().build();
+    }
+
+    private String jsonToRogueIp(InputStream stream) throws IllegalArgumentException {
+        String ip = new String();
+
+        JsonNode node;
+        try {
+            node = readTreeFromStream(mapper(), stream);
+        } catch (IOException e) {
+            log.info("Exception");
+            throw new IllegalArgumentException("Unable to parse add request", e);
+        }
+
+        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            JsonNode subNode = field.getValue();
+
+            String rogueIpStr = subNode.path("rogueIp").asText(null);
+            if (rogueIpStr != null) {
+                ip = rogueIpStr;
+            }
+        }
+        return ip;
     }
 
     private List<AppFilteringEntry> jsonToAppFilteringEntries(InputStream stream) throws IllegalArgumentException {

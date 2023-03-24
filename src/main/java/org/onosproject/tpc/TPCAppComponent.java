@@ -48,6 +48,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.onosproject.tpc.AppConstants.HIGH_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.AppConstants.MEDIUM_FLOW_RULE_PRIORITY;
@@ -81,7 +83,9 @@ public class TPCAppComponent implements TPCService {
     private static short ETH_TYPE_TPC_REPORT = (short) 0x5678;
     private static short ETH_TYPE_TPC_REPORT_MASK = (short) 0xFFFF;
 
-    private Set<String> rogue_ues;
+    private Set<String> rogue_ues = new HashSet<>();
+
+    private Lock lock = new ReentrantLock();
 
     private final InternalPacketProcessor packetProcessor = new InternalPacketProcessor();
 
@@ -95,9 +99,6 @@ public class TPCAppComponent implements TPCService {
         installAclPuntRules();
         installReportThrottlingRules();
 
-        rogue_ues.add("1.1.1.1");
-        rogue_ues.add("8.8.8.8");
-
         log.info("Started");
     }
 
@@ -105,6 +106,13 @@ public class TPCAppComponent implements TPCService {
     protected void deactivate() {
         // Then deregister the report endpoint
         packetService.removeProcessor(packetProcessor);
+
+        lock.lock();
+        try {
+            rogue_ues.clear();
+        } finally {
+            lock.unlock();
+        }
 
         // Then cleanup
         mainComponent.cleanUp();
@@ -141,8 +149,25 @@ public class TPCAppComponent implements TPCService {
     @Override
     public List<String> getRogueIps() {
         log.info("Received getRogueIps");
-        List<String> ret = new ArrayList<>(rogue_ues);
+        lock.lock();
+        List<String> ret;
+        try {
+            ret = new ArrayList<>(rogue_ues);
+        } finally {
+            lock.unlock();
+        }
         return ret;
+    }
+
+    @Override
+    public void blockRogueIp(String ip) {
+        log.info("Received blockRogueIp");
+        lock.lock();
+        try {
+            rogue_ues.add(ip);
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void installAclPuntRules() {
@@ -213,8 +238,13 @@ public class TPCAppComponent implements TPCService {
                 }
                 Ip4Address ue_addr = Ip4Address.valueOf(addr);
                 log.info("Rogue UE is: {}", ue_addr);
-                rogue_ues.add(ue_addr.toString());
-                log.info("UEs on blacklist are: {}", rogue_ues);
+                lock.lock();
+                try {
+                    rogue_ues.add(ue_addr.toString());
+                    log.info("UEs on blacklist are: {}", rogue_ues);
+                } finally {
+                    lock.unlock();
+                }
                 context.block();
             }
         }

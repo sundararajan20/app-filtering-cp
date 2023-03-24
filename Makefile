@@ -46,6 +46,12 @@ flush-flows:
 	${onos_curl} ${onos_url}/tpc/flush
 	@echo
 
+set-rogue-ue:
+	$(info *** Posting flowrules/test-rogue.json...)
+	${onos_curl} -X POST -H 'Content-Type:application/json' \
+		${onos_url}/tpc/blockRogueIp -d@./flowrules/test-rogue.json
+	@echo
+
 get-rogue-ues:
 	$(info *** Flushing flows...)
 	${onos_curl} ${onos_url}/tpc/rogueIps
