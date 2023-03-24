@@ -1,6 +1,6 @@
 {
   "1": {
-    "ueIpAddr": "10.250.237.159",
+    "ueIpAddr": "10.250.238.86",
     "appIpProto": "6",
     "appIpAddr": "10.64.5.35/32",
     "appL4PortLow": "10000",
@@ -9,7 +9,7 @@
     "action": "1"
   },
   "2": {
-    "ueIpAddr": "10.250.237.159",
+    "ueIpAddr": "10.250.238.86",
     "appIpProto": "6",
     "appIpAddr": "10.250.0.0/16",
     "appL4PortLow": "10000",

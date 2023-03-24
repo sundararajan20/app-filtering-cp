@@ -30,20 +30,6 @@ public class TPCWebResource extends AbstractWebResource {
         return Response.noContent().build();
     }
 
-    @GET
-    @Path("turn_on_checking")
-    public Response turnOnChecking() {
-        get(TPCService.class).turnOnChecking();
-        return Response.noContent().build();
-    }
-
-    @GET
-    @Path("turn_off_checking")
-    public Response turnOffChecking() {
-        get(TPCService.class).turnOffChecking();
-        return Response.noContent().build();
-    }
-
     /**
      * Post application filtering rules.
      *

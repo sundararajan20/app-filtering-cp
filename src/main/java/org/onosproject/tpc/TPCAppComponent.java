@@ -17,6 +17,7 @@ package org.onosproject.tpc;
 
 import com.google.common.collect.Lists;
 import org.onlab.packet.Ethernet;
+import org.onlab.packet.Ip4Address;
 import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.*;
@@ -44,13 +45,10 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import shaded.org.apache.commons.codec.binary.Hex;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static org.onlab.util.Tools.get;
 import static org.onosproject.tpc.AppConstants.HIGH_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.AppConstants.MEDIUM_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.common.Utils.buildFlowRule;
@@ -93,16 +91,12 @@ public class TPCAppComponent implements TPCService {
 
         // TODO: new devices might be discovered after
         installAclPuntRules();
-        setUpTelemetryStripping();
 
         log.info("Started");
     }
 
     @Deactivate
     protected void deactivate() {
-        // First stop the checking
-        cleanUpUpdateVersion();
-
         // Then deregister the report endpoint
         packetService.removeProcessor(packetProcessor);
 
@@ -138,71 +132,6 @@ public class TPCAppComponent implements TPCService {
         flowRuleService.removeFlowRulesById(appId);
     }
 
-    @Override
-    public void turnOnChecking() {
-        log.info("Received turnOnChecking");
-        setUpdateVersion();
-    }
-
-    @Override
-    public void turnOffChecking() {
-        log.info("Received turnOffChecking");
-        cleanUpUpdateVersion();
-    }
-
-    public void setUpTelemetryStripping() {
-        List<FlowRule> flowRules = new ArrayList<>();
-
-        for (Device device : deviceService.getAvailableDevices()) {
-            for (Integer portToAdd = 0; portToAdd < 512; portToAdd++) {
-            // for (PortNumber portNumber : edgePortsOnDevice(device.id())) {
-                // log.info("Edge port on device {} is {}", device.id(), portNumber);
-                // XXX: Hack
-                /*
-                Long portToAdd = portNumber.toLong();
-                if (portToAdd > 100) {
-                    portToAdd /= 100;
-                }
-                */
-
-                PiMatchFieldId UPDATE_VERSION = PiMatchFieldId.of("checker_header.variables.update_version");
-                PiMatchFieldId HDR_EG_PORT = PiMatchFieldId.of("eg_port");
-                String tableIdCheckLastHop = "FabricEgress.checker_control.tb_check_last_hop";
-                PiActionId piActionIdCheckLastHop = PiActionId.of("FabricEgress.checker_control.set_last_hop");
-
-                PiCriterion match = PiCriterion.builder()
-                        .matchExact(UPDATE_VERSION, 0x1)
-                        .matchExact(HDR_EG_PORT, portToAdd)
-                        .build();
-
-                PiAction action = PiAction.builder()
-                        .withId(piActionIdCheckLastHop)
-                        .build();
-
-                flowRules.add(buildFlowRule(device.id(), appId, tableIdCheckLastHop, match, action, MEDIUM_FLOW_RULE_PRIORITY));
-            }
-        }
-
-        flowRuleService.applyFlowRules(flowRules.toArray(new FlowRule[flowRules.size()]));
-    }
-
-    public List<PortNumber> edgePortsOnDevice(DeviceId deviceId) {
-        List<Port> portsOnDevice = deviceService.getPorts(deviceId);
-        List<PortNumber> portNumbersOnDevice = new ArrayList<>();
-        for (Port port : portsOnDevice) {
-            portNumbersOnDevice.add(port.number());
-        }
-        Set<Link> linksOnDevice = linkService.getDeviceEgressLinks(deviceId);
-
-        for (Link link : linksOnDevice) {
-            if (portNumbersOnDevice.contains(link.src().port())) {
-                portNumbersOnDevice.remove(link.src().port());
-            }
-        }
-
-        return portNumbersOnDevice;
-    }
-
     public void installAclPuntRules() {
         List<FlowRule> puntRules = new ArrayList<>();
         for (Device device : deviceService.getAvailableDevices()) {
@@ -228,62 +157,6 @@ public class TPCAppComponent implements TPCService {
         return buildFlowRule(deviceId, appId, tableId, match, action, HIGH_FLOW_RULE_PRIORITY);
     }
 
-    public void setUpdateVersion() {
-        List<FlowRule> rules = new ArrayList<>();
-        for (Device device : deviceService.getAvailableDevices()) {
-            rules.add(updateVersionRule(device.id()));
-        }
-
-        flowRuleService.applyFlowRules(rules.toArray(new FlowRule[rules.size()]));
-    }
-
-    public FlowRule updateVersionRule(DeviceId deviceId) {
-        String tableId = "FabricIngress.init_control.tb_set_update_version";
-        PiMatchFieldId piMatchFieldId = PiMatchFieldId.of("checker_header.variables.$valid$");
-        PiActionId piActionId = PiActionId.of("FabricIngress.init_control.set_update_version");
-        PiActionParamId piActionParamId = PiActionParamId.of("update_version");
-
-        byte match_valid = 0x1;
-        byte update_version = 0x1;
-
-        PiCriterion match = PiCriterion.builder()
-                .matchExact(piMatchFieldId, match_valid)
-                .build();
-
-        PiAction action = PiAction.builder()
-                .withId(piActionId)
-                .withParameter(new PiActionParam(piActionParamId, update_version))
-                .build();
-
-        return buildFlowRule(deviceId, appId, tableId, match, action, HIGH_FLOW_RULE_PRIORITY);
-    }
-
-    public void cleanUpUpdateVersion() {
-        Collection<FlowRule> flowRulesToRemove = Lists.newArrayList();
-        for (FlowRule flow : flowRuleService.getFlowEntriesById(appId)) {
-            if (flow.table().equals(PiTableId.of("FabricIngress.init_control.tb_set_update_version"))) {
-                flowRulesToRemove.add(flow);
-            }
-        }
-
-        if (flowRulesToRemove.isEmpty()) {
-            return;
-        }
-
-        flowRulesToRemove.forEach(flowRuleService::removeFlowRules);
-    }
-
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-        int v = bytes[j] & 0xFF;
-        hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-        hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
-
     /**
      * Processes incoming packets.
      */
@@ -292,13 +165,15 @@ public class TPCAppComponent implements TPCService {
         public void process(PacketContext context) {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
-                // String contents = StandardCharsets.UTF_8.decode(context.inPacket().unparsed()).toString();
-		ByteBuffer buf = context.inPacket().unparsed();
-		byte[] arr = new byte[buf.remaining()];
-		buf.get(arr);
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
-                log.info("Report contents are: {}", bytesToHex(arr));
-                log.info("");
+                byte[] ipv4_payload = eth.getPayload().serialize();
+                int addr = 0;
+                int offset = 3;
+                for (int i = 12; i < 16; i++) {
+                    addr += Byte.toUnsignedInt(ipv4_payload[i]) << offset;
+                    offset -= 1;
+                }
+                log.info("Rogue UE is: {}", Ip4Address.valueOf(addr));
                 context.block();
             }
         }
