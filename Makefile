@@ -35,14 +35,10 @@ demo-flows:
 		${onos_url}/tpc/add_rules -d@./flowrules/demo-flows.json
 	@echo
 
-turn-on-checking:
-	$(info *** Flushing flows...)
-	${onos_curl} ${onos_url}/tpc/turn_on_checking
-	@echo
-
-turn-off-checking:
-	$(info *** Flushing flows...)
-	${onos_curl} ${onos_url}/tpc/turn_off_checking
+demo-smf-flows:
+	$(info *** Posting flowrules/demo-flows.json...)
+	${onos_curl} -X POST -H 'Content-Type:application/json' \
+		${onos_url}/tpc/add_rules -d@./flowrules/demo-smf-flows.json
 	@echo
 
 flush-flows:
