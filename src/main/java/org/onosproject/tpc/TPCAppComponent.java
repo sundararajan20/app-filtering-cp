@@ -80,6 +80,7 @@ public class TPCAppComponent implements TPCService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     private MainComponent mainComponent;
 
+    private static short ETH_TYPE_IPV4 = (short) 0x0800;
     private static short ETH_TYPE_TPC_REPORT = (short) 0x5678;
     private static short ETH_TYPE_TPC_REPORT_MASK = (short) 0xFFFF;
 
@@ -233,7 +234,7 @@ public class TPCAppComponent implements TPCService {
         @Override
         public void process(PacketContext context) {
             Ethernet eth = context.inPacket().parsed();
-            if (eth.getEtherType() == ETH_TYPE_TPC_REPORT) {
+            if (eth.getEtherType() == ETH_TYPE_IPV4) {
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
                 byte[] ipv4_payload = eth.getPayload().serialize();
                 int addr = 0;
