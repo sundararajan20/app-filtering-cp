@@ -254,7 +254,6 @@ public class TPCAppComponent implements TPCService {
                     if (i > 12) {
                         rogue_address += ".";
                     }
-                    log.info("byte {}: {}", i, Byte.toUnsignedInt(ipv4_payload[i]));
                     rogue_address += String.valueOf(Byte.toUnsignedInt(ipv4_payload[i]));
                 }
                 log.info("Rogue UE is: {}", rogue_address);
