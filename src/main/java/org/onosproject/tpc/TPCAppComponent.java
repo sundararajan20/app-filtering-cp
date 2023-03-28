@@ -15,10 +15,7 @@
  */
 package org.onosproject.tpc;
 
-import com.google.common.collect.Lists;
 import org.onlab.packet.Ethernet;
-import org.onlab.packet.Ip4Address;
-import org.onosproject.cfg.ComponentConfigService;
 import org.onosproject.core.ApplicationId;
 import org.onosproject.net.*;
 import org.onosproject.net.device.DeviceService;
@@ -32,7 +29,6 @@ import org.onosproject.net.packet.PacketService;
 import org.onosproject.net.pi.model.PiActionId;
 import org.onosproject.net.pi.model.PiActionParamId;
 import org.onosproject.net.pi.model.PiMatchFieldId;
-import org.onosproject.net.pi.model.PiTableId;
 import org.onosproject.net.pi.runtime.PiAction;
 import org.onosproject.net.pi.runtime.PiActionParam;
 import org.onosproject.tpc.common.AppFilteringEntry;
@@ -46,13 +42,11 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.onosproject.tpc.AppConstants.HIGH_FLOW_RULE_PRIORITY;
-import static org.onosproject.tpc.AppConstants.MEDIUM_FLOW_RULE_PRIORITY;
 import static org.onosproject.tpc.common.Utils.buildFlowRule;
 
 /**
@@ -211,17 +205,30 @@ public class TPCAppComponent implements TPCService {
         flowRuleService.applyFlowRules(puntRules.toArray(new FlowRule[puntRules.size()]));
     }
 
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }
+
     public FlowRule reportThrottlingRule(DeviceId deviceId) {
         String tableId = "FabricIngress.checker_report_control.config";
         PiMatchFieldId HDR_ETH_TYPE_IS_VALID = PiMatchFieldId.of("eth_type_is_valid");
-        PiActionId piActionId = PiActionId.of("nop");
+        PiActionId piActionId = PiActionId.of("FabricIngress.checker_report.control.set_config");
 
         PiCriterion match = PiCriterion.builder()
                 .matchExact(HDR_ETH_TYPE_IS_VALID, 1)
                 .build();
 
+        byte[] mask = hexStringToByteArray("ffffc0000000");
+
         PiAction action = PiAction.builder()
                 .withId(piActionId)
+                .withParameter(new PiActionParam(PiActionParamId.of("timestamp_mask"), mask))
                 .build();
 
         return buildFlowRule(deviceId, appId, tableId, match, action, HIGH_FLOW_RULE_PRIORITY);
