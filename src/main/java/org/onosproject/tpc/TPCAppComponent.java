@@ -251,8 +251,11 @@ public class TPCAppComponent implements TPCService {
                 String rogue_address = new String();
                 byte[] ipv4_payload = eth.getPayload().serialize();
                 for (int i = 12; i < 16; i++) {
+                    if (i > 12) {
+                        rogue_address += ".";
+                    }
                     log.info("byte {}: {}", i, Byte.toUnsignedInt(ipv4_payload[i]));
-                    rogue_address += String.valueOf(ipv4_payload[i]);
+                    rogue_address += String.valueOf(Byte.toUnsignedInt(ipv4_payload[i]));
                 }
                 log.info("Rogue UE is: {}", rogue_address);
                 lock.lock();
