@@ -248,18 +248,16 @@ public class TPCAppComponent implements TPCService {
             if (eth.getEtherType() == ETH_TYPE_IPV4) {
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
                 log.info("Report payload: {}", bytesToHex(eth.getPayload().serialize()));
+                String rogue_address = new String();
                 byte[] ipv4_payload = eth.getPayload().serialize();
-                int addr = 0;
-                int offset = 3;
                 for (int i = 12; i < 16; i++) {
-                    addr += Byte.toUnsignedInt(ipv4_payload[i]) << offset;
-                    offset -= 1;
+                    log.info("byte {}: {}", i, Byte.toUnsignedInt(ipv4_payload[i]));
+                    rogue_address += String.valueOf(ipv4_payload[i]);
                 }
-                Ip4Address ue_addr = Ip4Address.valueOf(addr);
-                log.info("Rogue UE is: {}", ue_addr);
+                log.info("Rogue UE is: {}", rogue_address);
                 lock.lock();
                 try {
-                    // rogue_ues.add(ue_addr.toString());
+                    rogue_ues.add(rogue_address);
                     log.info("UEs on blacklist are: {}", rogue_ues);
                 } finally {
                     lock.unlock();
