@@ -218,7 +218,7 @@ public class TPCAppComponent implements TPCService {
     public FlowRule reportThrottlingRule(DeviceId deviceId) {
         String tableId = "FabricIngress.checker_report_control.config";
         PiMatchFieldId HDR_ETH_TYPE_IS_VALID = PiMatchFieldId.of("eth_type_is_valid");
-        PiActionId piActionId = PiActionId.of("FabricIngress.checker_report.control.set_config");
+        PiActionId piActionId = PiActionId.of("FabricIngress.checker_report_control.set_config");
 
         PiCriterion match = PiCriterion.builder()
                 .matchExact(HDR_ETH_TYPE_IS_VALID, 1)
