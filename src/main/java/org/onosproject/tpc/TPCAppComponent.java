@@ -227,6 +227,17 @@ public class TPCAppComponent implements TPCService {
         return buildFlowRule(deviceId, appId, tableId, match, action, HIGH_FLOW_RULE_PRIORITY);
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     /**
      * Processes incoming packets.
      */
@@ -236,6 +247,7 @@ public class TPCAppComponent implements TPCService {
             Ethernet eth = context.inPacket().parsed();
             if (eth.getEtherType() == ETH_TYPE_IPV4) {
                 log.info("TPC Report received from device {}!", context.inPacket().receivedFrom());
+                log.info("Report payload: {}", bytesToHex(eth.getPayload().serialize()));
                 byte[] ipv4_payload = eth.getPayload().serialize();
                 int addr = 0;
                 int offset = 3;
@@ -247,7 +259,7 @@ public class TPCAppComponent implements TPCService {
                 log.info("Rogue UE is: {}", ue_addr);
                 lock.lock();
                 try {
-                    rogue_ues.add(ue_addr.toString());
+                    // rogue_ues.add(ue_addr.toString());
                     log.info("UEs on blacklist are: {}", rogue_ues);
                 } finally {
                     lock.unlock();
